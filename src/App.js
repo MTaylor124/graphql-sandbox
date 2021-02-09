@@ -33,8 +33,8 @@ const theme = createMuiTheme({
 export default function App() {
   return (
     <MuiThemeProvider theme={theme}>
-        <Nav />
         <Router>
+            <Nav />
             <div className="app-container">
                 <Switch>
                     <Route exact path='/' component={Home} />
