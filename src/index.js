@@ -1,8 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import firebase from 'firebase/app'
+import 'firebase/analytics'
+
+var firebaseConfig = {
+    apiKey: "AIzaSyCnu17A-LFiEZhiHFwBWSCxoi51OEB30TQ",
+    authDomain: "graphql-testing-9efd3.firebaseapp.com",
+    projectId: "graphql-testing-9efd3",
+    storageBucket: "graphql-testing-9efd3.appspot.com",
+    messagingSenderId: "617316111633",
+    appId: "1:617316111633:web:98e252256e5244243e68b0",
+    measurementId: "G-5SV6PHXG0H"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
 
 ReactDOM.render(
   <React.StrictMode>
