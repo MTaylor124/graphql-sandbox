@@ -5,6 +5,8 @@ import reportWebVitals from './reportWebVitals';
 import firebase from 'firebase/app'
 import 'firebase/analytics'
 
+import {GlobalContextProvider} from './GlobalContext'
+
 var firebaseConfig = {
     apiKey: "AIzaSyCnu17A-LFiEZhiHFwBWSCxoi51OEB30TQ",
     authDomain: "graphql-testing-9efd3.firebaseapp.com",
@@ -19,9 +21,9 @@ var firebaseConfig = {
   firebase.analytics();
 
 ReactDOM.render(
-  <React.StrictMode>
+  <GlobalContextProvider>
     <App />
-  </React.StrictMode>,
+  </GlobalContextProvider>,
   document.getElementById('root')
 );
 

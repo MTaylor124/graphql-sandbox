@@ -1,0 +1,14 @@
+.d-nav-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 50px;
+}
+.d-nav-shadow {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 3px 2px -2px white;
+    /* color: rgb(13, 10, 63) */
+}
