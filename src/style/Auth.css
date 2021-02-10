@@ -6,6 +6,7 @@
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+    margin-top: 50px;
 }
 .d-auth-form-header {
     margin: 40px 0;
