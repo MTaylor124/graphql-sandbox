@@ -1,9 +1,13 @@
-// import Button from '@material-ui/core/Button'
+import Button from '@material-ui/core/Button'
 
 export default function Home() {
     return (
         <div>
-            Home
+            <Button
+            color='primary'
+            variant='contained'>
+                    test
+            </Button>
         </div>
     )
 }

@@ -18,14 +18,14 @@ const theme = createMuiTheme({
     background: 'rgb(116, 181, 207)',
     palette: {
         primary: {
-            main: 'rgb(146, 17, 17)',
-            light: 'rgb(252, 216, 56)',
-            dark: 'rgb(39, 4, 4)'
+            main: 'rgb(0, 0, 0)',
+            light: 'rgb(0, 0, 0)',
+            dark: 'rgb(0, 0, 0)'
         },
         secondary: {
-            main: 'rgb(226, 167, 4)',
+            main: 'rgb(255, 255, 255)',
             light: 'rgb(255, 255, 255)',
-            dark: 'rgb(87, 1, 1)'
+            dark: 'rgb(1, 1, 1)'
         }
     }
 })

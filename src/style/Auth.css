@@ -1,0 +1,15 @@
+.d-auth-header {
+    margin-bottom: 20px;
+}
+.d-auth-form-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+.d-auth-form-header {
+    margin: 40px 0;
+}
+.d-auth-form-footer {
+    margin-top: 20px;
+}

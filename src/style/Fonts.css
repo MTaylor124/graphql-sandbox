@@ -1,0 +1,10 @@
+.myfont1 {
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+.myfont2 {
+    color: white;
+    font-size: 0.9rem;
+    /* font-weight: 600; */
+}
