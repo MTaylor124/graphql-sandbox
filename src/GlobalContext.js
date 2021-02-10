@@ -22,9 +22,29 @@ export class GlobalContextProvider extends Component {
                 signUp: false,
                 toggleSignUp: () => {
                     this.setState(s => {
-                        return s.auth.signUp = !this.state.auth.signUp
+                        return s.transition.fading = true
+                    })
+                    setTimeout(() => {
+                        this.setState(s => {
+                            // clear values
+                            return s.auth.signUp = !this.state.auth.signUp
+                        })
+                    }, 300)
+                    setTimeout(() => {
+                        this.setState(s => {
+                            return s.transition.fading = false
+                        })
+                    }, 350)
+                },
+                submitting: false,
+                submitCredentials: () => {
+                    this.setState(s => {
+                        return s.auth.submitting = true
                     })
                 }
+            },
+            transition: {
+                fading: false
             }
         }
     }
