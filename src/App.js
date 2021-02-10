@@ -15,6 +15,7 @@ import Nav from './components/Nav/Nav'
 import Auth from './components/Auth/Auth'
 import Home from './components/Home/Home'
 import About from './components/About/About'
+import Notification from './components/Notification/Notification'
 
 import {useContext} from 'react'
 import {GlobalContext} from './GlobalContext'
@@ -51,6 +52,7 @@ export default function App() {
             <Router>
                 <Nav />
                 <div className="app-container">
+                    <Notification />
                     <Backdrop
                         open={transition.fading}
                         style={fadeStyle}

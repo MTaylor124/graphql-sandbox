@@ -8,6 +8,9 @@ import Button from '@material-ui/core/Button'
 import { makeStyles } from '@material-ui/core/styles'
 import CircularProgress from '@material-ui/core/CircularProgress'
 
+import firebase from 'firebase/app'
+import 'firebase/auth'
+import 'firebase/firestore'
 export default function Auth() {
     const useStyles = makeStyles({
         root: {
@@ -46,10 +49,12 @@ export default function Auth() {
     })
 
     let {
-        auth
+        auth,
+        notification,
+        user
     } = useContext(GlobalContext)
 
-    let authContent, submitFeedback, buttonCheck, footerContent
+    let authContent, submitFeedback, buttonCheck, footerContent, emailCheck, passCheck, confirmCheck
 
     const classes = useStyles();
 
@@ -67,6 +72,21 @@ export default function Auth() {
     }
     const feedbackStyle = {
         color: 'white'
+    }
+    if (auth.form.password !== null) {
+        passCheck = auth.form.password
+    } else {
+        passCheck = ''
+    }
+    if (auth.form.email  !== null) {
+        emailCheck = auth.form.email
+    } else {
+        emailCheck = ''
+    }
+    if (auth.form.confirm  !== null) {
+        confirmCheck = auth.form.confirm
+    } else {
+        confirmCheck = ''
     }
     if (auth.submitting) {
         buttonCheck = 'rgba(0,0,0,0)'
@@ -133,59 +153,72 @@ export default function Auth() {
             authContent = (
                 <div className='d-auth-form-container'>
                     <TextField
+                        error={auth.form.showEmailError}
+                        helperText={auth.form.emailError}
                         disabled={auth.submitting}
-                            style={customStyle}
-                            className={classes.root}
-                            variant="outlined"
-                            label="Email"
-                            InputProps={{
-                                style: {fontSize: '1.8rem'},
-                                classes: {
-                                   root: classes.root,
-                                   focused: classes.focused,
-                                   notchedOutline: classes.notchedOutline
-                                }
-                             }}
-                        />
+                        style={customStyle}
+                        className={classes.root}
+                        variant="outlined"
+                        label="Email"
+                        value={emailCheck}
+                        onChange={(e) => auth.form.setValue('email', e.target.value)}
+                        InputProps={{
+                            style: {fontSize: '1.8rem'},
+                            classes: {
+                                root: classes.root,
+                                focused: classes.focused,
+                                notchedOutline: classes.notchedOutline
+                            }
+                        }}
+                    />
                     <TextField
+                        error={auth.form.showPasswordError}
+                        helperText={auth.form.passwordError}
                         disabled={auth.submitting}
-                            style={customStyle}
-                            className={classes.root}
-                            variant="outlined"
-                            label="Password"
-                            type='password'
-                            InputProps={{
-                                style: {fontSize: '1.8rem'},
-                                classes: {
-                                   root: classes.root,
-                                   focused: classes.focused,
-                                   notchedOutline: classes.notchedOutline
-                                }
-                             }}
-                        />
-                        <TextField
-                            disabled={auth.submitting}
-                            style={customStyle}
-                            className={classes.root}
-                            variant="outlined"
-                            label="Confirm Password"
-                            type='password'
-                            InputProps={{
-                                style: {fontSize: '1.8rem'},
-                                classes: {
-                                   root: classes.root,
-                                   focused: classes.focused,
-                                   notchedOutline: classes.notchedOutline
-                                }
-                             }}
-                        />
+                        style={customStyle}
+                        className={classes.root}
+                        variant="outlined"
+                        label="Password"
+                        type='password'
+                        value={passCheck}
+                        onChange={(e) => auth.form.setValue('password', e.target.value)}
+                        InputProps={{
+                            style: {fontSize: '1.8rem'},
+                            classes: {
+                                root: classes.root,
+                                focused: classes.focused,
+                                notchedOutline: classes.notchedOutline
+                            }
+                        }}
+                    />
+                    <TextField
+                        error={auth.form.showConfirmError}
+                        helperText={auth.form.confirmError}
+                        disabled={auth.submitting}
+                        style={customStyle}
+                        className={classes.root}
+                        variant="outlined"
+                        label="Confirm Password"
+                        type='password'
+                        value={confirmCheck}
+                        onChange={(e) => auth.form.setValue('confirm', e.target.value)}
+                        InputProps={{
+                            style: {fontSize: '1.8rem'},
+                            classes: {
+                                root: classes.root,
+                                focused: classes.focused,
+                                notchedOutline: classes.notchedOutline
+                            }
+                        }}
+                    />
                     <Button
                         disabled={auth.submitting}
                         color='secondary'
                         variant='outlined'
                         style={submitButton}
                         onClick={() => {
-                            auth.submitCredentials()
+                            handleSignUp()
+                            // auth.submitCredentials('Signed up')
                         }}>
                             {submitFeedback}
                     </Button>
@@ -197,48 +230,107 @@ export default function Auth() {
                 <div className='d-auth-form-container'>
                     <TextField
                         disabled={auth.submitting}
-                            style={customStyle}
-                            className={classes.root}
-                            variant="outlined"
-                            label="Email"
-                            InputProps={{
-                                style: {fontSize: '1.8rem'},
-                                classes: {
-                                   root: classes.root,
-                                   focused: classes.focused,
-                                   notchedOutline: classes.notchedOutline
-                                }
-                             }}
-                        />
+                        style={customStyle}
+                        className={classes.root}
+                        variant="outlined"
+                        label="Email"
+                        value={emailCheck}
+                        onChange={(e) => auth.form.setValue('email', e.target.value)}
+                        InputProps={{
+                            style: {fontSize: '1.8rem'},
+                            classes: {
+                                root: classes.root,
+                                focused: classes.focused,
+                                notchedOutline: classes.notchedOutline
+                            }
+                        }}
+                    />
                     <TextField
                         disabled={auth.submitting}
-                            style={customStyle}
-                            className={classes.root}
-                            variant="outlined"
-                            label="Password"
-                            type='password'
-                            InputProps={{
-                                style: {fontSize: '1.8rem'},
-                                classes: {
-                                   root: classes.root,
-                                   focused: classes.focused,
-                                   notchedOutline: classes.notchedOutline
-                                }
-                             }}
-                        />
+                        style={customStyle}
+                        className={classes.root}
+                        variant="outlined"
+                        label="Password"
+                        type='password'
+                        value={passCheck}
+                        onChange={(e) => auth.form.setValue('password', e.target.value)}
+                        InputProps={{
+                            style: {fontSize: '1.8rem'},
+                            classes: {
+                                root: classes.root,
+                                focused: classes.focused,
+                                notchedOutline: classes.notchedOutline
+                            }
+                        }}
+                    />
                     <Button
                         disabled={auth.submitting}
                         color='secondary'
                         variant='outlined'
                         style={submitButton}
                         onClick={() => {
-                            auth.submitCredentials()
+                            auth.submitCredentials('Signed in')
                         }}>
                             {submitFeedback}
                     </Button>
                     {footerContent}
                 </div>
             )
+        }
+    }
+    function handleSignUp() {
+        auth.form.clearErrors()
+        if (!auth.form.email) {
+            auth.form.setError('email', 'Email must not be blank')
+        } else if (!auth.form.password) {
+            auth.form.setError('password', 'Password must not be blank')
+        } else if (!auth.form.confirm) {
+            auth.form.setError('confirm', 'Confirm Password must not be blank')
+        } else if (auth.form.password !== auth.form.confirm) {
+            auth.form.setError('confirm', 'Passwords must match')
+        } else {
+            auth.submitCredentials()
+            firebase.auth().createUserWithEmailAndPassword(auth.form.email, auth.form.password)
+            .then(userCreds => {
+                // Fade out and show notification or maybe not cuz i already have feedback
+                // clear all values of anything that will not be used again
+                notification.showNotification('Signed up Successfully!')
+                auth.endSubmitting()
+                user.setuid(userCreds.user.uid)
+
+                let today = new Date()
+                let day = today.getDate().toString()
+                let month = (today.getMonth() + 1).toString()
+                let year = today.getFullYear().toString()
+                let todaysDate = month.concat('-',day,'-',year)
+
+                firebase.firestore().collection('users')
+                .add({
+                    userID: userCreds.user.uid,
+                    joined: todaysDate
+                })
+                .then(docRef => {
+                    user.setdocRef(docRef.id)
+                })
+                .catch(err => {
+                    console.error(err.code)
+                    notification.showNotification(`An error occurred: ${err.message}`)
+                })
+            })
+            // make database entry in users to save user data
+            .catch(err => {
+                auth.endSubmitting()
+                if (err.code === 'auth/invalid-email') {
+                    auth.form.setError('email', err.message)
+                } else if (err.code === 'auth/weak-password') {
+                    auth.form.setError('password', err.message)
+                } else if (err.code === 'auth/email-already-in-use') {
+                    auth.form.setError('email', err.message)
+                } else {
+                    notification.showNotification(`An error occurred: ${err.message}`)
+                }
+            })
+
         }
     }
     return (
