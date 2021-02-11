@@ -15,17 +15,19 @@ export default function Auth() {
     const useStyles = makeStyles({
         root: {
             "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
-                borderColor: "rgba(0,0,0,0)"
+                borderColor: "rgba(0,0,0,0)",
+                backgroundColor: 'rgba(0,0,0,0.05)',
+                // borderRadius: '0'
             },
             "&:hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
                 borderColor: "rgba(0,0,0,0)",
-                backgroundColor: 'rgba(0,0,0,0.04)',
-                borderRadius: '0'
+                backgroundColor: 'rgba(0,0,0,0.1)',
+                // borderRadius: '0'
             },
             "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
                 borderColor: "rgba(0,0,0,0)",
-                backgroundColor: 'rgba(0,0,0,0.13)',
-                borderRadius: '0'
+                backgroundColor: 'rgba(0,0,0,0.2)',
+                // borderRadius: '0'
             },
             "& .MuiOutlinedInput-input": {
                 color: "white"
@@ -60,7 +62,8 @@ export default function Auth() {
 
     const customStyle = {
         marginBottom: '20px',
-        width: '420px'
+        width: '420px',
+        borderTop: '30px'
     }
     const switchStyle = {
         padding: '3px',
@@ -92,7 +95,7 @@ export default function Auth() {
         buttonCheck = 'rgba(0,0,0,0)'
         footerContent = ''
     } else {
-        buttonCheck = 'rgba(0,0,0,0.04)'
+        buttonCheck = 'rgba(0,0,0,0.05)'
         if (auth.signUp) {
             footerContent = (
                 <div className="d-auth-form-footer myfont2">
@@ -189,6 +192,14 @@ export default function Auth() {
                                 focused: classes.focused,
                                 notchedOutline: classes.notchedOutline
                             }
+                        }}
+                        InputLabelProps={{
+                            style: {
+                                // display: 'flex',
+                                // alignSelf: 'center'
+                                // fontSize: '0.9rem',
+                                // paddingTop: '15px'
+                            },
                         }}
                     />
                     <TextField
@@ -294,8 +305,6 @@ export default function Auth() {
             .then(userCreds => {
                 // Fade out and show notification or maybe not cuz i already have feedback
                 // clear all values of anything that will not be used again
-                notification.showNotification('Signed up Successfully!')
-                auth.endSubmitting()
                 user.setuid(userCreds.user.uid)
 
                 let today = new Date()
@@ -310,10 +319,14 @@ export default function Auth() {
                     joined: todaysDate
                 })
                 .then(docRef => {
-                    user.setdocRef(docRef.id)
+                    notification.showNotification('Signed up Successfully!')
+                    auth.endSubmitting()
+                    auth.logIn()
+                    user.setDocRef(docRef.id)
                 })
                 .catch(err => {
                     console.error(err.code)
+                    auth.endSubmitting()
                     notification.showNotification(`An error occurred: ${err.message}`)
                 })
             })

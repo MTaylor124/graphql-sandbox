@@ -1,7 +1,9 @@
 export default function AuthControl() {
     return (
-        <div>
-            logged in
+        <div className='d-section-container'>
+            <div className="d-auth-control-container">
+                logged in
+            </div>
         </div>
     )
 }
