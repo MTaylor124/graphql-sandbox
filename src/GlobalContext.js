@@ -160,10 +160,13 @@ export class GlobalContextProvider extends Component {
                             return s
                         })
                     },
+                    oldPassword: '',
                     newPassword: '',
                     confirmPassword: '',
+                    oldError: null,
                     newError: null,
                     confirmError: null,
+                    showOldError: false,
                     showNewError: false,
                     showConfirmError: false,
                     setError: (type, err) => {
@@ -172,19 +175,26 @@ export class GlobalContextProvider extends Component {
                                 s.auth.changePass.showConfirmError = true
                                 return s.auth.changePass.confirmError = err
                             })
-                        } else {
+                        } else if (type === 'new') {
                             this.setState(s => {
                                 s.auth.changePass.showNewError = true
                                 return s.auth.changePass.newError = err
+                            })
+                        } else if (type === 'old') {
+                            this.setState(s => {
+                                s.auth.changePass.showOldError = true
+                                return s.auth.changePass.oldError = err
                             })
                         }
                     },
                     clearErrors: () => {
                         this.setState(s => {
+                            s.auth.changePass.oldError = null
                             s.auth.changePass.newError = null
                             s.auth.changePass.confirmError = null
+                            s.auth.changePass.showOldError = false
                             s.auth.changePass.showNewError = false
-                            s.auth.changePass.showconfirmError = false
+                            s.auth.changePass.showConfirmError = false
                             return s
                         })
                     },
@@ -193,10 +203,16 @@ export class GlobalContextProvider extends Component {
                             this.setState(s => {
                                 return s.auth.changePass.confirmPassword = content
                             })
-                        } else {
+                        } else if (type === 'new'){
                             this.setState(s => {
                                 return s.auth.changePass.newPassword = content
                             })
+                        } else if (type === 'old'){
+                            this.setState(s => {
+                                return s.auth.changePass.oldPassword = content
+                            })
+                        } else {
+                            return
                         }
                     },
                     updating: false,
@@ -206,17 +222,29 @@ export class GlobalContextProvider extends Component {
                         })
                     },
                     updated: () => {
-                        // set notification
                         this.setState(s => {
-                            s.auth.changePass.newPassword = ''
-                            s.auth.changePass.confirmPassword = ''
-                            s.auth.changePass.newError = null
-                            s.auth.changePass.confirmError = null
-                            s.auth.changePass.showNewError = false
-                            s.auth.changePass.showconfirmError = false
-                            s.auth.changePass.showing = false
-                            return s.auth.changePass.updating = false
+                            return s.transition.fading = true
                         })
+                        setTimeout(() => {
+                            this.setState(s => {
+                                s.auth.changePass.oldPassword = ''
+                                s.auth.changePass.newPassword = ''
+                                s.auth.changePass.confirmPassword = ''
+                                s.auth.changePass.oldError = null
+                                s.auth.changePass.newError = null
+                                s.auth.changePass.confirmError = null
+                                s.auth.changePass.showOldError = false
+                                s.auth.changePass.showNewError = false
+                                s.auth.changePass.showConfirmError = false
+                                s.auth.changePass.showing = false
+                                return s.auth.changePass.updating = false
+                            })
+                        }, 500)
+                        setTimeout(() => {
+                            this.setState(s => {
+                                return s.transition.fading = false
+                            })
+                        }, 700)
                     },
                     failed: () => {
                         this.setState(s => {
@@ -276,7 +304,35 @@ export class GlobalContextProvider extends Component {
             },
             transition: {
                 fading: true,
-                landing: true
+                landing: true,
+                fade: (time) => {
+                    this.setState(s => {
+                        return s.transition.fading = true
+                    })
+
+                    let timeCheck
+                    if (time) {
+                        timeCheck = time
+                    } else {
+                        timeCheck = 2000
+                    }
+
+                    setTimeout(() => {
+                        this.setState(s => {
+                            return s.transition.fading = false
+                        })
+                    }, timeCheck)
+                },
+                fadeOn: () => {
+                    this.setState(s => {
+                        return s.transition.fading = true
+                    })
+                },
+                fadeOff: () => {
+                    this.setState(s => {
+                        return s.transition.fading = false
+                    })
+                }
             }
         }
     }
@@ -307,7 +363,8 @@ export class GlobalContextProvider extends Component {
                     .then(snapshot => {
                         snapshot.forEach(doc => {
                             // console.log('date?', doc.data().joined)
-                            console.log('logged in')
+                            // console.log('logged in')
+                            return
                         })
                     })
                     .catch(err => {

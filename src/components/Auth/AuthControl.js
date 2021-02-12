@@ -90,6 +90,26 @@ export default function AuthControl() {
             <div className="d-auth-control-options-container">
                 <TextField
                     type='password'
+                    error={auth.changePass.showOldError}
+                    helperText={auth.changePass.oldError}
+                    onChange={(e) => auth.changePass.setPass('old', e.target.value)}
+                    value={auth.changePass.oldPassword}
+                    style={customStyle}
+                    className={classes.root}
+                    variant="outlined"
+                    disabled={auth.changePass.updating}
+                    label="Old Password"
+                    InputProps={{
+                        style: {fontSize: '1.8rem'},
+                        classes: {
+                            root: classes.root,
+                            focused: classes.focused,
+                            notchedOutline: classes.notchedOutline
+                        }
+                    }}
+                />
+                <TextField
+                    type='password'
                     error={auth.changePass.showNewError}
                     helperText={auth.changePass.newError}
                     onChange={(e) => auth.changePass.setPass('new', e.target.value)}
@@ -177,7 +197,9 @@ export default function AuthControl() {
     function handleUpdatePassword() {
         auth.changePass.clearErrors()
 
-        if (!auth.changePass.newPassword) {
+        if (!auth.changePass.oldPassword) {
+            auth.changePass.setError('old', 'Password must not be blank')
+        } else if (!auth.changePass.newPassword) {
             auth.changePass.setError('new', 'Password must not be blank')
         } else if (!auth.changePass.confirmPassword) {
             auth.changePass.setError('confirm', 'Confirm Password must not be blank')
@@ -187,20 +209,33 @@ export default function AuthControl() {
             auth.changePass.update()
 
             let user = firebase.auth().currentUser
+            const credential = firebase.auth.EmailAuthProvider.credential(
+                user.email, 
+                auth.changePass.oldPassword
+            )
 
-            user.updatePassword(auth.changePass.confirmPassword)
+            user.reauthenticateWithCredential(credential)
             .then(() => {
-                notification.showNotification('Password Updated!')
-                auth.changePass.updated()
+                user.updatePassword(auth.changePass.confirmPassword)
+                .then(() => {
+                    notification.showNotification('Password Updated!')
+                    auth.changePass.updated()
+                })
+                .catch(err => {
+                    setTimeout(() => {
+                        auth.changePass.failed()
+                        if (err.code === 'auth/weak-password') {
+                            auth.changePass.setError('new', err.message)
+                        } else {
+                            console.error(err.code)
+                            notification.showNotification(`Error: ${err.message}`)
+                        }
+                    }, 2000)
+                })
             })
             .catch(err => {
+                auth.changePass.setError('old', err.message)
                 auth.changePass.failed()
-                if (err.code === 'auth/weak-password') {
-                    auth.changePass.setError('new', err.message)
-                } else {
-                    console.error(err.code)
-                    notification.showNotification(`Error: ${err.message}`)
-                }
             })
         }
     }

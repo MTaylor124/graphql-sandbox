@@ -53,7 +53,8 @@ export default function Auth() {
     let {
         auth,
         notification,
-        user
+        user,
+        transition
     } = useContext(GlobalContext)
 
     let authContent, submitFeedback, buttonCheck, footerContent, emailCheck, passCheck, confirmCheck
@@ -303,39 +304,51 @@ export default function Auth() {
             auth.form.setError('password', 'Password must not be blank')
         } else {
             auth.submitCredentials()
-            firebase.auth().signInWithEmailAndPassword(auth.form.email, auth.form.password)
-            .then(userCreds => {
-                user.setuid(userCreds.user.uid)
-                notification.showNotification('Welcome Back!')
-                firebase.firestore().collection('users').where('userID', '==', userCreds.user.uid).limit(1)
-                .get()
-                .then(snapshot => {
-                    snapshot.forEach(doc => {
-                        // Do whatever I need to do with the user data
-                        console.log('signed in')
+
+            setTimeout(() => {
+                transition.fadeOn()
+
+                firebase.auth().signInWithEmailAndPassword(auth.form.email, auth.form.password)
+                .then(userCreds => {
+                    user.setuid(userCreds.user.uid)
+                    // notification.showNotification('Welcome Back!')
+                    firebase.firestore().collection('users').where('userID', '==', userCreds.user.uid).limit(1)
+                    .get()
+                    .then(snapshot => {
+                        snapshot.forEach(doc => {
+                            // Do whatever I need to do with the user data
+                            // console.log('signed in')
+                            return
+                        })
+                    })
+                    .catch(err => {
+                        notification.showNotification(`Error: ${err.message}`)
+                        console.error(err.code)
+                        auth.endSubmitting()
                     })
                 })
                 .then(() => {
                     auth.endSubmitting()
                     auth.logIn()
-
+                    notification.showNotification('Welcome Back')
+                })
+                .then(() => {
+                    setTimeout(() => {
+                        transition.fadeOff()
+                    }, 1500)
                 })
                 .catch(err => {
-                    notification.showNotification(`Error: ${err.message}`)
                     console.error(err.code)
-                    auth.endSubmitting()
+                    if (err.code === 'auth/invalid-email' || err.code === 'auth/user-not-found') {
+                        auth.form.setError('email', err.message)
+                    } else if (err.code === 'auth/wrong-password') {
+                        auth.form.setError('password', err.message)
+                    } else {
+                        notification.showNotification(`Error: ${err.message}`)
+                    }
                 })
-            })
-            .catch(err => {
-                console.error(err.code)
-                if (err.code === 'auth/invalid-email' || err.code === 'auth/user-not-found') {
-                    auth.form.setError('email', err.message)
-                } else if (err.code === 'auth/wrong-password') {
-                    auth.form.setError('password', err.message)
-                } else {
-                    notification.showNotification(`Error: ${err.message}`)
-                }
-            })
+            }, 300)
+
         }
     }
 
@@ -350,50 +363,67 @@ export default function Auth() {
         } else if (auth.form.password !== auth.form.confirm) {
             auth.form.setError('confirm', 'Passwords must match')
         } else {
-            notification.blockAuto()
             auth.submitCredentials()
-            firebase.auth().createUserWithEmailAndPassword(auth.form.email, auth.form.password)
-            .then(userCreds => {
-                // Fade out and show notification or maybe not cuz i already have feedback
-                // clear all values of anything that will not be used again
-                user.setuid(userCreds.user.uid)
+            setTimeout(() => {
+                transition.fadeOn()
+                notification.blockAuto()
 
-                let today = new Date()
-                let day = today.getDate().toString()
-                let month = (today.getMonth() + 1).toString()
-                let year = today.getFullYear().toString()
-                let todaysDate = month.concat('-',day,'-',year)
 
-                firebase.firestore().collection('users')
-                .add({
-                    userID: userCreds.user.uid,
-                    joined: todaysDate
+                firebase.auth().createUserWithEmailAndPassword(auth.form.email, auth.form.password)
+                .then(userCreds => {
+                    user.setuid(userCreds.user.uid)
+    
+                    let today = new Date()
+                    let day = today.getDate().toString()
+                    let month = (today.getMonth() + 1).toString()
+                    let year = today.getFullYear().toString()
+                    let todaysDate = month.concat('-',day,'-',year)
+    
+                        firebase.firestore().collection('users')
+                        .add({
+                            userID: userCreds.user.uid,
+                            joined: todaysDate
+                        })
+                        .then(docRef => {
+                            auth.endSubmitting()
+                            auth.logIn()
+                            user.setDocRef(docRef.id)
+                        })
+                        .then(() => {
+                            setTimeout(() => {
+                                transition.fadeOff()
+                            }, 600)
+                            setTimeout(() => {
+                                notification.showNotification('Signed up Successfully!')
+                            }, 200)
+                        })
+                        .catch(err => {
+                            transition.fadeOff()
+                            console.error(err.code)
+                            auth.endSubmitting()
+                            notification.showNotification(`Error: ${err.message}`)
+                        })
                 })
-                .then(docRef => {
-                    notification.showNotification('Signed up Successfully!')
-                    auth.endSubmitting()
-                    auth.logIn()
-                    user.setDocRef(docRef.id)
-                })
+                // make database entry in users to save user data
                 .catch(err => {
-                    console.error(err.code)
                     auth.endSubmitting()
-                    notification.showNotification(`Error: ${err.message}`)
+                    if (err.code === 'auth/invalid-email') {
+                        auth.form.setError('email', err.message)
+                    } else if (err.code === 'auth/weak-password') {
+                        auth.form.setError('password', err.message)
+                    } else if (err.code === 'auth/email-already-in-use') {
+                        auth.form.setError('email', err.message)
+                    } else {
+                        notification.showNotification(`Error: ${err.message}`)
+                    }
                 })
-            })
-            // make database entry in users to save user data
-            .catch(err => {
-                auth.endSubmitting()
-                if (err.code === 'auth/invalid-email') {
-                    auth.form.setError('email', err.message)
-                } else if (err.code === 'auth/weak-password') {
-                    auth.form.setError('password', err.message)
-                } else if (err.code === 'auth/email-already-in-use') {
-                    auth.form.setError('email', err.message)
-                } else {
-                    notification.showNotification(`Error: ${err.message}`)
-                }
-            })
+
+
+            }, 400)
+
+
+
+
 
         }
     }
