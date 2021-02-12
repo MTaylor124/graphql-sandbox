@@ -304,51 +304,51 @@ export default function Auth() {
             auth.form.setError('password', 'Password must not be blank')
         } else {
             auth.submitCredentials()
+            
+            //  come back to this later 
 
-            setTimeout(() => {
-                transition.fadeOn()
-
-                firebase.auth().signInWithEmailAndPassword(auth.form.email, auth.form.password)
-                .then(userCreds => {
-                    user.setuid(userCreds.user.uid)
-                    // notification.showNotification('Welcome Back!')
-                    firebase.firestore().collection('users').where('userID', '==', userCreds.user.uid).limit(1)
-                    .get()
-                    .then(snapshot => {
-                        snapshot.forEach(doc => {
-                            // Do whatever I need to do with the user data
-                            // console.log('signed in')
-                            return
-                        })
-                    })
-                    .catch(err => {
-                        notification.showNotification(`Error: ${err.message}`)
-                        console.error(err.code)
-                        auth.endSubmitting()
+            transition.fadeOn()
+            firebase.auth().signInWithEmailAndPassword(auth.form.email, auth.form.password)
+            .then(userCreds => {
+                user.setuid(userCreds.user.uid)
+                // notification.showNotification('Welcome Back!')
+                firebase.firestore().collection('users').where('userID', '==', userCreds.user.uid).limit(1)
+                .get()
+                .then(snapshot => {
+                    snapshot.forEach(doc => {
+                        // Do whatever I need to do with the user data
+                        // console.log('signed in')
+                        return
                     })
                 })
-                .then(() => {
+                .catch(err => {
+                    notification.showNotification(`Error: ${err.message}`)
+                    console.error(err.code)
+                    auth.endSubmitting()
+                })
+            })
+            .then(() => {
+                setTimeout(() => {
                     auth.endSubmitting()
                     auth.logIn()
                     notification.showNotification('Welcome Back')
-                })
-                .then(() => {
-                    setTimeout(() => {
-                        transition.fadeOff()
-                    }, 1500)
-                })
-                .catch(err => {
-                    console.error(err.code)
-                    if (err.code === 'auth/invalid-email' || err.code === 'auth/user-not-found') {
-                        auth.form.setError('email', err.message)
-                    } else if (err.code === 'auth/wrong-password') {
-                        auth.form.setError('password', err.message)
-                    } else {
-                        notification.showNotification(`Error: ${err.message}`)
-                    }
-                })
-            }, 300)
-
+                }, 900)
+            })
+            .then(() => {
+                setTimeout(() => {
+                    transition.fadeOff()
+                }, 1500)
+            })
+            .catch(err => {
+                console.error(err.code)
+                if (err.code === 'auth/invalid-email' || err.code === 'auth/user-not-found') {
+                    auth.form.setError('email', err.message)
+                } else if (err.code === 'auth/wrong-password') {
+                    auth.form.setError('password', err.message)
+                } else {
+                    notification.showNotification(`Error: ${err.message}`)
+                }
+            })
         }
     }
 
