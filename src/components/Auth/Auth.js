@@ -143,9 +143,9 @@ export default function Auth() {
         )
     } else {
         if (auth.signUp) {
-            submitFeedback = 'Sign Up!'
+            submitFeedback = 'Sign Up'
         } else {
-            submitFeedback = 'Sign In!'
+            submitFeedback = 'Sign In'
         }
     }
 
@@ -240,6 +240,8 @@ export default function Auth() {
             authContent = (
                 <div className='d-auth-form-container'>
                     <TextField
+                        error={auth.form.showEmailError}
+                        helperText={auth.form.emailError}
                         disabled={auth.submitting}
                         style={customStyle}
                         className={classes.root}
@@ -257,6 +259,8 @@ export default function Auth() {
                         }}
                     />
                     <TextField
+                        error={auth.form.showPasswordError}
+                        helperText={auth.form.passwordError}
                         disabled={auth.submitting}
                         style={customStyle}
                         className={classes.root}
@@ -280,7 +284,8 @@ export default function Auth() {
                         variant='outlined'
                         style={submitButton}
                         onClick={() => {
-                            auth.submitCredentials('Signed in')
+                            handleSignIn()
+                            // auth.submitCredentials('Signed in')
                         }}>
                             {submitFeedback}
                     </Button>
@@ -289,6 +294,51 @@ export default function Auth() {
             )
         }
     }
+
+    function handleSignIn() {
+        auth.form.clearErrors()
+        if (!auth.form.email) {
+            auth.form.setError('email', 'Email must not be blank')
+        } else if (!auth.form.password) {
+            auth.form.setError('password', 'Password must not be blank')
+        } else {
+            auth.submitCredentials()
+            firebase.auth().signInWithEmailAndPassword(auth.form.email, auth.form.password)
+            .then(userCreds => {
+                user.setuid(userCreds.user.uid)
+                notification.showNotification('Welcome Back!')
+                firebase.firestore().collection('users').where('userID', '==', userCreds.user.uid).limit(1)
+                .get()
+                .then(snapshot => {
+                    snapshot.forEach(doc => {
+                        // Do whatever I need to do with the user data
+                        console.log('signed in')
+                    })
+                })
+                .then(() => {
+                    auth.endSubmitting()
+                    auth.logIn()
+
+                })
+                .catch(err => {
+                    notification.showNotification(`Error: ${err.message}`)
+                    console.error(err.code)
+                    auth.endSubmitting()
+                })
+            })
+            .catch(err => {
+                console.error(err.code)
+                if (err.code === 'auth/invalid-email' || err.code === 'auth/user-not-found') {
+                    auth.form.setError('email', err.message)
+                } else if (err.code === 'auth/wrong-password') {
+                    auth.form.setError('password', err.message)
+                } else {
+                    notification.showNotification(`Error: ${err.message}`)
+                }
+            })
+        }
+    }
+
     function handleSignUp() {
         auth.form.clearErrors()
         if (!auth.form.email) {
@@ -300,6 +350,7 @@ export default function Auth() {
         } else if (auth.form.password !== auth.form.confirm) {
             auth.form.setError('confirm', 'Passwords must match')
         } else {
+            notification.blockAuto()
             auth.submitCredentials()
             firebase.auth().createUserWithEmailAndPassword(auth.form.email, auth.form.password)
             .then(userCreds => {
@@ -327,7 +378,7 @@ export default function Auth() {
                 .catch(err => {
                     console.error(err.code)
                     auth.endSubmitting()
-                    notification.showNotification(`An error occurred: ${err.message}`)
+                    notification.showNotification(`Error: ${err.message}`)
                 })
             })
             // make database entry in users to save user data
@@ -340,7 +391,7 @@ export default function Auth() {
                 } else if (err.code === 'auth/email-already-in-use') {
                     auth.form.setError('email', err.message)
                 } else {
-                    notification.showNotification(`An error occurred: ${err.message}`)
+                    notification.showNotification(`Error: ${err.message}`)
                 }
             })
 

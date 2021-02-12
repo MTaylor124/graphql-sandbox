@@ -24,7 +24,7 @@ export default function Notification() {
         <Backdrop
         open={notification.showingNotification}
         style={notificationStyle}
-        transitionDuration={1000}>
+        transitionDuration={{enter: 300, exit: 800}}>
             {notification.notificationText}
         </Backdrop>
     )
