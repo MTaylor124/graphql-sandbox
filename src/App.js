@@ -16,6 +16,7 @@ import Auth from './components/Auth/Auth'
 import Home from './components/Home/Home'
 import About from './components/About/About'
 import Notification from './components/Notification/Notification'
+import PokemonHome from './components/Pokemon/PokemonHome'
 
 import {useContext} from 'react'
 import {GlobalContext} from './GlobalContext'
@@ -79,6 +80,7 @@ export default function App() {
                     <Switch>
                         <Route exact path='/' component={Home} />
                         <Route path='/auth' component={Auth} />
+                        <Route path='/pokemon' component={PokemonHome} />
                         <Route path='/about' component={About} />
                     </Switch>
                 </div>

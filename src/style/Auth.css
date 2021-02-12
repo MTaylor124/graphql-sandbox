@@ -23,6 +23,7 @@
 }
 .d-auth-control-header {
     margin-bottom: 50px;
+    /* color: rgb(46, 111, 182); */
 }
 .d-auth-control-options-container {
     display: flex;
