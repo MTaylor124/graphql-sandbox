@@ -14,3 +14,19 @@
 .d-auth-form-footer {
     margin-top: 20px;
 }
+.d-auth-control-container {
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+.d-auth-control-header {
+    margin-bottom: 50px;
+}
+.d-auth-control-options-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}

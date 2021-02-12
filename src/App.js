@@ -37,16 +37,33 @@ const theme = createMuiTheme({
 })
 
 export default function App() {
-    const fadeStyle = {
-        zIndex: 24383475,
-        backgroundColor: 'rgb(73, 148, 230)',
-        width: '625px',
-        height: '625px',
-        margin: 'auto'
-    }
+
     let {
         transition
     } = useContext(GlobalContext)
+
+    let durationCheck, heightCheck, widthCheck
+
+
+    
+    if (transition.landing) {
+        durationCheck = { enter: 0, exit: 300 }
+        widthCheck = '100vw'
+        heightCheck = '100vh'
+    } else {
+        durationCheck = 500
+        widthCheck = '625px'
+        heightCheck = '625px'
+    }
+    
+    const fadeStyle = {
+        zIndex: 24383475,
+        backgroundColor: 'rgb(73, 148, 230)',
+        width: widthCheck,
+        height: heightCheck,
+        margin: 'auto'
+    }
+
     return (
         <MuiThemeProvider theme={theme}>
             <Router>
@@ -56,7 +73,7 @@ export default function App() {
                     <Backdrop
                         open={transition.fading}
                         style={fadeStyle}
-                        transitionDuration={300}
+                        transitionDuration={durationCheck}
                     >
                     </Backdrop>
                     <Switch>

@@ -1,5 +1,9 @@
 import {createContext, Component} from 'react'
 
+import firebase from 'firebase/app'
+import 'firebase/auth'
+import 'firebase/firestore'
+
 export const GlobalContext = createContext()
 
 export class GlobalContextProvider extends Component {
@@ -83,8 +87,20 @@ export class GlobalContextProvider extends Component {
                 },
                 logOut: () => {
                     this.setState(s => {
-                        return s.auth.loggedIn = false
+                        return s.transition.fading = true
                     })
+                    setTimeout(() => {
+                        this.state.auth.form.clearValues()
+                        this.setState(s => {
+                            s.auth.loggedIn = false
+                            return s.auth.signUp = false
+                        })
+                    }, 400)
+                    setTimeout(() => {
+                        this.setState(s => {
+                            return s.transition.fading = false
+                        })
+                    }, 450)
                 },
                 signUp: false,
                 toggleSignUp: () => {
@@ -93,36 +109,163 @@ export class GlobalContextProvider extends Component {
                     })
                     setTimeout(() => {
                         this.state.auth.form.clearValues()
+                        this.state.auth.form.clearErrors()
                         this.setState(s => {
                             return s.auth.signUp = !this.state.auth.signUp
                         })
-                    }, 300)
+                    }, 400)
                     setTimeout(() => {
                         this.setState(s => {
                             return s.transition.fading = false
                         })
-                    }, 350)
+                    }, 450)
                 },
                 submitting: false,
                 submitCredentials: () => {
                     this.setState(s => {
                         return s.auth.submitting = true
                     })
-                    // setTimeout(() => {
-                    //     this.state.notification.showNotification(`${message} Successfully!`)
-                    // }, 2000)
                 },
                 endSubmitting: () => {
                     this.setState(s => {
                         return s.auth.submitting = false
                     })
                 },
-                submitSuccessful: () => {
-
+                changePass: {
+                    showing: false,
+                    toggleChangePassword: () => {
+                        this.setState(s => {
+                            return s.transition.fading = true
+                        })
+                        setTimeout(() => {
+                            this.state.auth.changePass.clearForm()
+                            this.setState(s => {
+                                return s.auth.changePass.showing = !this.state.auth.changePass.showing
+                            })
+                        }, 500)
+                        setTimeout(() => {
+                            this.setState(s => {
+                                return s.transition.fading = false
+                            })
+                        }, 700)
+                    },
+                    clearForm: () => {
+                        this.setState(s => {
+                            s.auth.changePass.newPassword = ''
+                            s.auth.changePass.confirmPassword = ''
+                            s.auth.changePass.newError = null
+                            s.auth.changePass.confirmError = null
+                            s.auth.changePass.showNewError = false
+                            s.auth.changePass.showconfirmError = false
+                            return s
+                        })
+                    },
+                    oldPassword: '',
+                    newPassword: '',
+                    confirmPassword: '',
+                    oldError: null,
+                    newError: null,
+                    confirmError: null,
+                    showOldError: false,
+                    showNewError: false,
+                    showConfirmError: false,
+                    setError: (type, err) => {
+                        if (type === 'confirm') {
+                            this.setState(s => {
+                                s.auth.changePass.showConfirmError = true
+                                return s.auth.changePass.confirmError = err
+                            })
+                        } else if (type === 'new') {
+                            this.setState(s => {
+                                s.auth.changePass.showNewError = true
+                                return s.auth.changePass.newError = err
+                            })
+                        } else if (type === 'old') {
+                            this.setState(s => {
+                                s.auth.changePass.showOldError = true
+                                return s.auth.changePass.oldError = err
+                            })
+                        }
+                    },
+                    clearErrors: () => {
+                        this.setState(s => {
+                            s.auth.changePass.oldError = null
+                            s.auth.changePass.newError = null
+                            s.auth.changePass.confirmError = null
+                            s.auth.changePass.showOldError = false
+                            s.auth.changePass.showNewError = false
+                            s.auth.changePass.showConfirmError = false
+                            return s
+                        })
+                    },
+                    setPass: (type, content) => {
+                        if (type === 'confirm') {
+                            this.setState(s => {
+                                return s.auth.changePass.confirmPassword = content
+                            })
+                        } else if (type === 'new'){
+                            this.setState(s => {
+                                return s.auth.changePass.newPassword = content
+                            })
+                        } else if (type === 'old'){
+                            this.setState(s => {
+                                return s.auth.changePass.oldPassword = content
+                            })
+                        } else {
+                            return
+                        }
+                    },
+                    updating: false,
+                    update: () => {
+                        this.setState(s => {
+                            return s.auth.changePass.updating = true
+                        })
+                    },
+                    updated: () => {
+                        this.setState(s => {
+                            return s.transition.fading = true
+                        })
+                        setTimeout(() => {
+                            this.setState(s => {
+                                s.auth.changePass.oldPassword = ''
+                                s.auth.changePass.newPassword = ''
+                                s.auth.changePass.confirmPassword = ''
+                                s.auth.changePass.oldError = null
+                                s.auth.changePass.newError = null
+                                s.auth.changePass.confirmError = null
+                                s.auth.changePass.showOldError = false
+                                s.auth.changePass.showNewError = false
+                                s.auth.changePass.showConfirmError = false
+                                s.auth.changePass.showing = false
+                                return s.auth.changePass.updating = false
+                            })
+                        }, 500)
+                        setTimeout(() => {
+                            this.setState(s => {
+                                return s.transition.fading = false
+                            })
+                        }, 700)
+                    },
+                    failed: () => {
+                        this.setState(s => {
+                            return s.auth.changePass.updating = false
+                        })
+                    }
                 }
             },
             notification: {
-                showingNotification: true,
+                blockingAuto: false,
+                blockAuto: () => {
+                    this.setState(s => {
+                        return s.notification.blockingAuto = true
+                    })
+                    setTimeout(() => {
+                        this.setState(s => {
+                            return s.notification.blockingAuto = false
+                        })
+                    }, 5000)
+                },
+                showingNotification: false,
                 notificationText: '',
                 showNotification: (notif) => {
                     this.setState(s => {
@@ -160,9 +303,76 @@ export class GlobalContextProvider extends Component {
                 }
             },
             transition: {
-                fading: false
+                fading: true,
+                landing: true,
+                fade: (time) => {
+                    this.setState(s => {
+                        return s.transition.fading = true
+                    })
+
+                    let timeCheck
+                    if (time) {
+                        timeCheck = time
+                    } else {
+                        timeCheck = 2000
+                    }
+
+                    setTimeout(() => {
+                        this.setState(s => {
+                            return s.transition.fading = false
+                        })
+                    }, timeCheck)
+                },
+                fadeOn: () => {
+                    this.setState(s => {
+                        return s.transition.fading = true
+                    })
+                },
+                fadeOff: () => {
+                    this.setState(s => {
+                        return s.transition.fading = false
+                    })
+                }
             }
         }
+    }
+
+    componentDidMount() {
+        setTimeout(() => {
+            this.setState(s => {
+                return s.transition.fading = false
+            })
+        }, 1000)
+        setTimeout(() => {
+            this.setState(s => {
+                return s.transition.landing = false
+            })
+        }, 1310)
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                this.setState(s => {
+                    s.user.uid = user.uid
+                    return s.auth.loggedIn = true
+                })
+                if (this.state.notification.blockingAuto === false) {
+                    setTimeout(() => {
+                        this.state.notification.showNotification('Welcome Back')
+                    }, 1000)
+                    firebase.firestore().collection('users').where('userID', '==', user.uid).limit(1)
+                    .get()
+                    .then(snapshot => {
+                        snapshot.forEach(doc => {
+                            // console.log('date?', doc.data().joined)
+                            // console.log('logged in')
+                            return
+                        })
+                    })
+                    .catch(err => {
+                        console.error(err.code)
+                    })
+                }
+            }
+        })
     }
     
     render() {
