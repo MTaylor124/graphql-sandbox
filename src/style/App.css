@@ -1,6 +1,7 @@
 @import './Nav.css';
 @import './Fonts.css';
 @import './Auth.css';
+@import './Pokemon.css';
 
 html, body { 
     height: 100%;
