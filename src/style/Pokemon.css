@@ -1,0 +1,12 @@
+.d-poke-container {
+    width: 100%;
+    /* background-color: white; */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    border: 2px solid white;
+    padding: 40px 0 30px;
+    /* min-height: 500px; */
+    margin-top: 20px;
+}

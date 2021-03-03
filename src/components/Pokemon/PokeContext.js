@@ -10,7 +10,15 @@ export class PokeContextProvider extends Component {
         super()
 
         this.state = {
-            poke: 'yes'
+            pokemList: [],
+            addToPokemList: newPokemon => {
+                this.setState({
+                    pokemList: [...this.state.pokemList, newPokemon]
+                })
+            },
+            showPokemon: () => {
+                console.log('pokemlist:', this.state.pokemList)
+            }
         }
     }
 

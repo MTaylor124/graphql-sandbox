@@ -362,6 +362,8 @@ export class GlobalContextProvider extends Component {
                     .get()
                     .then(snapshot => {
                         snapshot.forEach(doc => {
+                            this.state.user.setDocRef(doc.id)
+                            // console.log('docid???', doc.id)
                             // console.log('date?', doc.data().joined)
                             // console.log('logged in')
                             return
